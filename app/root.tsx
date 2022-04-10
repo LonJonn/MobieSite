@@ -14,10 +14,6 @@ const HEADER_LINKS = {
   links: [
     {
       link: "/",
-      label: "Home",
-    },
-    {
-      link: "/search",
       label: "Search",
     },
     {
@@ -34,6 +30,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
+
       <body>
         <MantineProvider
           theme={{ primaryColor: "red", colorScheme: "dark" }}

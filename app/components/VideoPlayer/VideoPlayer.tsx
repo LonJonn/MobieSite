@@ -1,7 +1,18 @@
-import { useMantineTheme } from "@mantine/core";
+import { ActionIcon, createStyles, Group, Stack, useMantineTheme } from "@mantine/core";
 import Hls from "hls.js";
 import Plyr from "plyr";
 import { useRef, useEffect } from "react";
+
+const useStyles = createStyles((theme) => ({
+  wrapper: {
+    "--plyr-color-main": theme.colors[theme.primaryColor][5],
+  },
+  offsetButton: {
+    width: "auto",
+    paddingInline: theme.spacing.sm,
+    fontSize: theme.fontSizes.xs,
+  },
+}));
 
 export type VideoPlayerProps = {
   src: string;
@@ -9,7 +20,7 @@ export type VideoPlayerProps = {
 };
 
 export function VideoPlayer({ src, subtitles }: VideoPlayerProps) {
-  const theme = useMantineTheme();
+  const { classes } = useStyles();
 
   /** Setup video */
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -31,17 +42,58 @@ export function VideoPlayer({ src, subtitles }: VideoPlayerProps) {
     }
   }, [src, subtitles]);
 
+  /** Caption Offset */
+  function offsetCue(amount: number) {
+    const cues = videoRef.current!.textTracks[0].cues!;
+
+    Array.from(cues).forEach((cue) => {
+      cue.startTime += amount;
+      cue.endTime += amount;
+    });
+  }
+
   return (
-    <video
-      ref={videoRef}
-      playsInline
-      controls
-      crossOrigin="anonymous"
-      style={{
-        "--plyr-color-main": theme.colors[theme.primaryColor][5],
-      }}
-    >
-      <track kind="captions" label="English captions" src="" srcLang="en" default />
-    </video>
+    <Stack className={classes.wrapper}>
+      <video ref={videoRef} playsInline controls crossOrigin="anonymous">
+        <track kind="captions" label="English captions" src="" srcLang="en" default />
+      </video>
+
+      {subtitles && (
+        <Group position="center">
+          <ActionIcon
+            size={32}
+            variant="default"
+            onClick={() => offsetCue(-1)}
+            className={classes.offsetButton}
+          >
+            –1s
+          </ActionIcon>
+          <ActionIcon
+            size={32}
+            variant="default"
+            onClick={() => offsetCue(-0.1)}
+            className={classes.offsetButton}
+          >
+            –0.1s
+          </ActionIcon>
+          <ActionIcon
+            size={32}
+            variant="default"
+            onClick={() => offsetCue(0.1)}
+            className={classes.offsetButton}
+          >
+            +0.1s
+          </ActionIcon>
+          <ActionIcon
+            size={32}
+            variant="default"
+            onClick={() => offsetCue(1)}
+            className={classes.offsetButton}
+          >
+            +1s
+          </ActionIcon>
+        </Group>
+      )}
+    </Stack>
   );
 }
