@@ -1,8 +1,17 @@
 node_modules
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/dsks
+!.yarn/versions
+.pnp.*
 
-/.cache
-/build
-/public/build
+.cache
 .env
+.vercel
+.output
 
-/.yarn/cache
+/build/
+/public/build
+/api/index.js
