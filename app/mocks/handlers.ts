@@ -2062,7 +2062,8 @@ window.slug='10234724-moon-knight-2021';</script>    <script>
     );
   }),
 
-  rest.get("https://lookmovie2.to/api/v1/security/episode-access", (req, res, ctx) => {
+  rest.get("https://lookmovie2.to/api/v1/security/episode-access", async (req, res, ctx) => {
+    await new Promise((r) => setTimeout(r, 500));
     return res(
       ctx.status(200),
       ctx.json({

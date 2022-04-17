@@ -6,10 +6,6 @@ import { Results } from "~/components/Results/Results";
 import { MOVIE_SEARCH_URL, SHOW_SEARCH_URL } from "~/constants";
 import type { SearchResult } from "~/types";
 
-const LOADER_HEADERS = {
-  "Cache-Control": "public, max-age=3600",
-};
-
 type LoaderData = {
   results: SearchResult[];
 };
@@ -31,10 +27,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   movieData.result.forEach((result: any) => (result.type = "movie"));
   showData.result.forEach((result: any) => (result.type = "show"));
 
-  return json<LoaderData>(
-    { results: [...movieData.result, ...showData.result] },
-    { headers: LOADER_HEADERS }
-  );
+  return json<LoaderData>({ results: [...movieData.result, ...showData.result] });
 };
 
 export default function Search() {
