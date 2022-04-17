@@ -1,4 +1,5 @@
 export interface SearchResult {
+  type: "movie" | "show";
   imdb_rating: string;
   slug: string;
   year: string;
@@ -7,4 +8,10 @@ export interface SearchResult {
   title: string;
   backdrop: string;
   poster: string;
+}
+
+export interface EpisodeDetails {
+  id_episode: number;
+  season: string;
+  episode: string;
 }

@@ -15,7 +15,7 @@ const useStyles = createStyles((theme) => ({
 }));
 
 export type VideoPlayerProps = {
-  src: string;
+  src?: string;
   subtitles?: string;
 };
 
@@ -25,13 +25,18 @@ export function VideoPlayer({ src, subtitles }: VideoPlayerProps) {
   /** Setup video */
   const videoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
-    if (!videoRef.current) {
-      return;
-    }
-
-    new Plyr(videoRef.current, {
+    const player = new Plyr(videoRef.current!, {
       captions: { active: true, update: true, language: "en" },
     });
+
+    return () => player.destroy();
+  }, []);
+
+  /** Load video + subs */
+  useEffect(() => {
+    if (!videoRef.current || !src) {
+      return;
+    }
 
     const hls = new Hls();
     hls.loadSource(src);

@@ -41,6 +41,7 @@ export function Results({ results }: ResultsProps) {
     >
       {results.map((result) => (
         <ResultCard
+          type={result.type}
           key={result.slug}
           slug={result.slug}
           title={result.title}

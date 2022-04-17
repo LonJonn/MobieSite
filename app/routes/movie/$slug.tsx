@@ -5,7 +5,7 @@ import { useLoaderData } from "@remix-run/react";
 import plyrStyles from "plyr/dist/plyr.css";
 import { VideoPlayer } from "~/components/VideoPlayer";
 import { MOVIE_ACCESS_URL, MOVIE_DETAILS_URL, SUBTITLES_URL } from "~/constants";
-import { extractMovieId } from "~/helpers/extract-movie-id.helper";
+import { extractMovieDetails } from "~/helpers/extract-movie-details.helper";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: plyrStyles }];
@@ -23,21 +23,25 @@ type LoaderData = {
 export const loader: LoaderFunction = async ({ params }) => {
   const slug = params.slug as string;
 
+  // Get movie details
   const detailsRes = await fetch(MOVIE_DETAILS_URL + slug);
   const detailsMarkup = await detailsRes.text();
 
-  const movieId = extractMovieId(detailsMarkup);
+  const movie = extractMovieDetails(detailsMarkup);
 
-  if (!movieId) {
+  if (!movie.id) {
     return new Response("", { status: 404 });
   }
 
-  const accessRes = await fetch(MOVIE_ACCESS_URL + movieId);
+  // Get streams + subs
+  const accessRes = await fetch(MOVIE_ACCESS_URL + movie.id);
   const accessData = await accessRes.json();
 
+  // Just return highest quality stream
   const stream =
     accessData.streams["1080p"] ?? accessData.streams["720p"] ?? accessData.streams["480p"];
 
+  // Find english subs
   const subsLocation = accessData.subtitles.find((sub: any) => sub.language === "English")?.file;
   const subtitles = subsLocation ? SUBTITLES_URL + subsLocation : undefined;
 

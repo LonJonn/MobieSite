@@ -3,7 +3,7 @@ import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useLoaderData, useTransition } from "@remix-run/react";
 import { Results } from "~/components/Results/Results";
-import { MOVIE_SEARCH_URL } from "~/constants";
+import { MOVIE_SEARCH_URL, SHOW_SEARCH_URL } from "~/constants";
 import type { SearchResult } from "~/types";
 
 const LOADER_HEADERS = {
@@ -22,10 +22,19 @@ export const loader: LoaderFunction = async ({ request }) => {
     return json({ results: [] });
   }
 
-  const res = await fetch(MOVIE_SEARCH_URL + search);
-  const data = await res.json();
+  const moviePromise = fetch(MOVIE_SEARCH_URL + search).then((res) => res.json());
+  const showPromise = fetch(SHOW_SEARCH_URL + search).then((res) => res.json());
 
-  return json<LoaderData>({ results: data.result }, { headers: LOADER_HEADERS });
+  const [movieData, showData] = await Promise.all([moviePromise, showPromise]);
+
+  // Assign types
+  movieData.result.forEach((result: any) => (result.type = "movie"));
+  showData.result.forEach((result: any) => (result.type = "show"));
+
+  return json<LoaderData>(
+    { results: [...movieData.result, ...showData.result] },
+    { headers: LOADER_HEADERS }
+  );
 };
 
 export default function Search() {
