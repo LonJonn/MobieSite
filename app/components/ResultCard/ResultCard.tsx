@@ -1,6 +1,6 @@
 import { Badge, Button, Card, Group, Highlight, Image, Stack, Text } from "@mantine/core";
 import { Link, useSearchParams } from "@remix-run/react";
-import { formatDate } from "~/helpers/date-formatter.helper";
+import { formatDate } from "~/utils";
 
 export type CardProps = {
   type: "movie" | "show";

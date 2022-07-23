@@ -1,4 +1,4 @@
-import { ActionIcon, createStyles, Group, Stack, useMantineTheme } from "@mantine/core";
+import { ActionIcon, createStyles, Group, Stack } from "@mantine/core";
 import Hls from "hls.js";
 import Plyr from "plyr";
 import { useRef, useEffect } from "react";
