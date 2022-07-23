@@ -1,21 +1,23 @@
-import type { LoaderFunction } from "@remix-run/node";
+import type { LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { getEpisode } from "~/helpers/get-episode.helper";
+import { EPISODE_ACCESS_URL, SUBTITLES_URL } from "~/constants";
 
-type LoaderData = {
-  stream: string;
-  subtitles?: string;
-};
-
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader = async ({ request }: LoaderArgs) => {
   const url = new URL(request.url);
   const id = url.searchParams.get("id") as string;
 
-  const episode = await getEpisode(id);
+  const accessRes = await fetch(EPISODE_ACCESS_URL + id);
+  const accessData = await accessRes.json();
 
-  if (!episode) {
-    throw new Response("Not Found", { status: 404 });
+  const stream: string =
+    accessData.streams["1080"] ?? accessData.streams["720"] ?? accessData.streams["480"];
+
+  if (!stream) {
+    throw new Response("No streams available for this episode.", { status: 404 });
   }
 
-  return json<LoaderData>(episode);
+  const subsLocation = accessData.subtitles.find((sub: any) => sub.language === "English")?.file;
+  const subtitles: string | undefined = subsLocation ? SUBTITLES_URL + subsLocation : undefined;
+
+  return json({ stream, subtitles });
 };

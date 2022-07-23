@@ -9,9 +9,3 @@ export interface SearchResult {
   backdrop: string;
   poster: string;
 }
-
-export interface EpisodeDetails {
-  id_episode: number;
-  season: string;
-  episode: string;
-}
