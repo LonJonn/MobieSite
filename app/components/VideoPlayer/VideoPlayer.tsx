@@ -22,7 +22,6 @@ export type VideoPlayerProps = {
 export function VideoPlayer({ src, subtitles }: VideoPlayerProps) {
   const { classes } = useStyles();
 
-  /** Setup video */
   const videoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     const player = new Plyr(videoRef.current!, {
@@ -45,9 +44,10 @@ export function VideoPlayer({ src, subtitles }: VideoPlayerProps) {
     if (subtitles) {
       videoRef.current.querySelector("track")!.src = subtitles;
     }
+
+    return () => hls.destroy();
   }, [src, subtitles]);
 
-  /** Caption Offset */
   function offsetCue(amount: number) {
     const cues = videoRef.current!.textTracks[0].cues!;
 
