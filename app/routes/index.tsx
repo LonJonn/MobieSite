@@ -16,20 +16,8 @@ import {
 } from "@mantine/core";
 import { json } from "@remix-run/node";
 import { Form, Link, useLoaderData, useTransition, useSearchParams } from "@remix-run/react";
-import { MOVIE_SEARCH_URL, SHOW_SEARCH_URL } from "~/constants";
 import { formatDate } from "~/utils";
-
-type SearchResult = {
-  type: "movie" | "show";
-  imdb_rating: string;
-  slug: string;
-  year: string;
-  flag_quality: string;
-  release_date: string;
-  title: string;
-  backdrop: string;
-  poster: string;
-};
+import adapter, { type SearchResult } from "~/adapters";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const url = new URL(request.url);
@@ -39,15 +27,9 @@ export const loader = async ({ request }: LoaderArgs) => {
     return json<SearchResult[]>([]);
   }
 
-  const [movieData, showData] = await Promise.all([
-    fetch(MOVIE_SEARCH_URL + search).then((res) => res.json()),
-    fetch(SHOW_SEARCH_URL + search).then((res) => res.json()),
-  ]);
+  const movieResults = await adapter.search(search);
 
-  return json<SearchResult[]>([
-    ...movieData.result.map((result: any) => ({ ...result, type: "movie" })),
-    ...showData.result.map((result: any) => ({ ...result, type: "show" })),
-  ]);
+  return json(movieResults);
 };
 
 export default function Search() {
@@ -109,30 +91,17 @@ function Results({ results }: ResultsProps) {
       ]}
     >
       {results.map((result) => (
-        <ResultCard
-          key={result.slug}
-          type={result.type}
-          slug={result.slug}
-          title={result.title}
-          imageUrl={result.backdrop}
-          releaseDate={result.release_date}
-          rating={result.imdb_rating}
-        />
+        <ResultCard key={result.id} result={result} />
       ))}
     </SimpleGrid>
   );
 }
 
 type CardProps = {
-  type: "movie" | "show";
-  slug: string;
-  title: string;
-  imageUrl: string;
-  releaseDate: string;
-  rating: string;
+  result: SearchResult;
 };
 
-function ResultCard({ type, slug, title, imageUrl, releaseDate, rating }: CardProps) {
+function ResultCard({ result: { id, type, title, imageUrl, releaseDate, rating } }: CardProps) {
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") ?? "";
 
@@ -157,7 +126,7 @@ function ResultCard({ type, slug, title, imageUrl, releaseDate, rating }: CardPr
           </Badge>
         </Group>
 
-        <Button component={Link} to={`/${type}/${slug}`} variant="light" fullWidth>
+        <Button component={Link} to={`/${type}/${id}`} variant="light" fullWidth>
           Play
         </Button>
       </Stack>

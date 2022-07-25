@@ -4,46 +4,29 @@ import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import plyrStyles from "plyr/dist/plyr.css";
 import { VideoPlayer } from "~/components/VideoPlayer";
-import { MOVIE_ACCESS_URL, MOVIE_DETAILS_URL, SUBTITLES_URL } from "~/constants";
+
+import adapter from "~/adapters";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: plyrStyles }];
 };
 
 export const loader = async ({ params }: LoaderArgs) => {
-  // Get movie details
-  const res = await fetch(MOVIE_DETAILS_URL + params.slug);
-  const markup = await res.text();
+  const movie = await adapter.getMovieStream(params.slug as string);
 
-  const MOVIE_ID_REGEX = /id_movie:\s(\d*),/g;
-  const iDCaptureGroup = MOVIE_ID_REGEX.exec(markup)?.[1];
-  const id = iDCaptureGroup ? Number(iDCaptureGroup) : undefined;
-
-  if (!id) {
+  if (!movie) {
     throw new Response("Not Found", { status: 404 });
   }
 
-  // Get streams + subs
-  const accessRes = await fetch(MOVIE_ACCESS_URL + id);
-  const accessData = await accessRes.json();
-
-  // Just return highest quality stream
-  const stream =
-    accessData.streams["1080p"] ?? accessData.streams["720p"] ?? accessData.streams["480p"];
-
-  // Find english subs
-  const subsLocation = accessData.subtitles.find((sub: any) => sub.language === "English")?.file;
-  const subtitles = subsLocation ? SUBTITLES_URL + subsLocation : undefined;
-
-  return json({ id, stream, subtitles });
+  return json(movie);
 };
 
 export default function Search() {
-  const { stream, subtitles } = useLoaderData<typeof loader>();
+  const { videoUrl, subtitlesUrl } = useLoaderData<typeof loader>();
 
   return (
     <Container mb={96}>
-      <VideoPlayer src={stream} subtitles={subtitles} />
+      <VideoPlayer src={videoUrl} subtitles={subtitlesUrl} />
     </Container>
   );
 }
