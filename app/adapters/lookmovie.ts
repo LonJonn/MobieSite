@@ -2,7 +2,7 @@
 
 import type { Adapter } from ".";
 
-const BASE_URL = new URL("https://playerwatchlm18.xyz");
+const BASE_URL = new URL("https://lookmovie2.to");
 
 const COOKIE = "PHPSESSID=soqfca8i0572e5j4q8atldovt7;";
 
@@ -34,7 +34,7 @@ const lookmovieAdapter: Adapter = {
       type: r.type,
       id: r.slug,
       title: r.title,
-      imageUrl: r.backdrop,
+      imageUrl: new URL(r.backdrop.w1280, BASE_URL).toString(),
       releaseDate: r.release_date,
       rating: r.imdb_rating,
     }));
